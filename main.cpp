@@ -40,5 +40,5 @@ cout << list[1] << endl;
 cout << list[2] << endl;
 cout << list[3] << endl;
 
-    return 0;
+    //return 0;
 }
