@@ -9,86 +9,120 @@
 using namespace std;
 
 
-
-template <class T>
-class DSList {
-    class Node {
-    public:
-        T data;
-        Node* next;
-        Node* prev;
-
-        Node() {
-            next = nullptr;
-            prev = nullptr;
-        }
-        Node(T data) {
-            this->data = data;
-            next = nullptr;
-            prev = nullptr;
-        }
-    };
-    Node* head = nullptr;
-    Node* tail = nullptr;
-
-public:
-    void push_back(T data);
-    void push_front(T data);
-    T& operator[] (int);
-
-
-    //overloaded << operator to print the list
-    friend ostream &operator << (ostream &output,  DSList<T>& list)
-    {
-        Node* temp = list.head;
-        cout << "Printing the list: " << endl;
-        while (temp)
-        {
-            cout << temp->data << " ";
-            temp = temp->next;
-        }
-        cout << endl;
-        return output;
-    }
-
+template<typename T>
+//Node struct/class for use in the Linked List
+struct Node {
+    T item;
+    Node<T> *next;
+    Node<T> *previous;
 };
 
-template <class T>
-void DSList<T>::push_back(T data) {
-    Node* curr = new Node(data);
-    if(head == nullptr) {
-        head = curr;
-        tail = curr;
-    }
-    else {
-        tail->next = curr;
-        curr->prev = tail;
-    }
-    tail = curr;
-}
+//Linked list class
+template<typename T>
+class DSList {
 
-template <class T>
-void DSList<T>::push_front(T data) {
-    Node* curr = new Node(data);
-    if(head == nullptr) {
-        head = curr;
-        tail = curr;
-    }
-    else {
-        head->prev = curr;
-        curr->next = head;
-        head = curr;
-    }
-}
+private:
 
-template <class T>
-T & DSList<T>::operator[](int val) {
-    Node *temp = head;
-    for(int i = 0; i < val; i++) {
-        temp = temp->next;
+    Node<T> head;
+    Node<T> tail;
+
+public:
+    //default constructor
+    DSList() {
+
+        head.next = &tail;
+        tail.previous = &head;
+        head.previous = nullptr;
+        tail.next = nullptr;
+
     }
-    return temp->data;
-}
+
+    //assignment operator
+    DSList& operator=(const DSList& copy)
+    {
+        if(this == &copy)
+            return *this;
+
+        while (copy.head->next!=nullptr)
+        {
+            Node<T> *curr = copy.head->next;
+            insertLast(curr->element);
+            copy.head->next = curr->next;
+        }
+
+        return *this;
+    }
+
+    //destructor
+    ~DSList() {
+
+    }
+
+    // Returns the head of the list (1st item)
+    Node<T>* front() {
+        return head.next;
+    }
+
+    //Returns the tail in the list (last item)
+    Node<T>* end() {
+        return &tail;
+    }
+
+    // Adds a new item at the end of the list
+    void push_back(T item) {
+        insertAfter(*tail.previous, item);
+    }
+
+    //Adds item as the new head of the list
+    void addAsHead(T item) {
+        insertAfter(head, item);
+    }
+
+    //remove an item at a specific index
+    void removeIndex(int index) {
+        Node<T> *node = getNode(index);
+        if (node != nullptr) {
+            removeNode(node);
+        }
+    }
+
+    // insert item at a specific index
+    void insertNodeAt(int index, T item) {
+        Node<T> *node = getNode(index);
+        if (node != nullptr) {
+            insertAfter(*node, item);
+        }
+    }
+
+    // returns the node at a specific index
+    Node<T> *getNode(int index) {
+        Node<T> *node = front();
+        for (int i = 0; i < index && node != end(); i++) {
+            node = node->next;
+        }
+        if (node == end()) {
+            return nullptr;
+        }
+        return node;
+    }
+
+    // removes a node
+    void removeNode(Node<T> *node) {
+        node->next->previous = node->previous;
+        node->previous->next = node->next;
+        delete node;
+    }
+
+    //insert a node after another specific node
+    void insertAfter(Node<T> &after, T item) {
+        Node<T> *node = new Node<T>();
+        node->item = item;
+        node->previous = &after;
+        node->next = after.next;
+        after.next->previous = node;
+        after.next = node;
+    }
+};
 
 
 
